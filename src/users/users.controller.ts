@@ -1,6 +1,7 @@
 import { Body, Controller, Param, Post } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/request/create-user.dto';
+import { LoginUserDto } from './dto/request/login-user.dto';
 
 @Controller('users')
 export class UsersController {
@@ -11,7 +12,7 @@ export class UsersController {
   }
 
   @Post('login')
-  signIn(@Body() user: CreateUserDto) {
-    return this.usersService.findOneByEmail(user.email);
+  signIn(@Body() user: LoginUserDto) {
+    return this.usersService.findOneById(user.id);
   }
 }

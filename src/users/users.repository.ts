@@ -1,7 +1,7 @@
 import { Model } from 'mongoose';
 import { User, UserDocument } from './schemas/users.schema';
 import * as bcrypt from 'bcrypt';
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 
 @Injectable()
@@ -20,7 +20,16 @@ export class UsersRepository {
     });
   }
 
+  async findOneById(id: string) {
+    return this.userModel.findOne({ _id: id }).select('-password').exec();
+  }
+
   async findOneByEmail(email: string) {
-    return this.userModel.findOne({ email }).exec();
+    const user = await this.userModel.findOne({ email });
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    return user;
   }
 }

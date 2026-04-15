@@ -9,7 +9,7 @@ import { UsersRepository } from '../users/users.repository';
 import { AuthSignupDto } from './dto/request/auth-signup-dto';
 import { AuthSigninDto } from './dto/request/auth-signin.dto';
 import { UsersService } from '../users/users.service';
-import { Request } from 'express';
+import { UserDocument } from '../users/schemas/users.schema';
 
 @Injectable()
 export class AuthService {
@@ -25,7 +25,7 @@ export class AuthService {
     const payload = { sub: user.id, email: user.email };
 
     return {
-      accessToken: await this.jwtService.signAsync(payload),
+      accessToken: this.jwtService.sign(payload),
     };
   }
 
@@ -42,19 +42,20 @@ export class AuthService {
     const payload = { sub: user.id, email: user.email };
 
     return {
-      accessToken: await this.jwtService.signAsync(payload),
+      accessToken: this.jwtService.sign(payload),
       user: this.usersService.getUser(user),
     };
   }
 
-  // async getProfile(email: string) {
-  //   return this.usersRepository.findOneByEmail(email);
-  // }
-  async getProfile(email: string) {
-    const user = await this.usersRepository.findOneByEmail(email);
+  async getProfile(id: string) {
+    const user = await this.usersRepository.findOneById(id);
     if (!user) {
       throw new UnauthorizedException('User not found');
     }
+    return this.usersService.getUser(user);
+  }
+
+  getProfileOnGuard(user: UserDocument) {
     return this.usersService.getUser(user);
   }
 }

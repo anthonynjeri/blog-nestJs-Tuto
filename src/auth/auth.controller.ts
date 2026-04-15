@@ -10,9 +10,8 @@ import { AuthService } from './auth.service';
 import { AuthSigninDto } from './dto/request/auth-signin.dto';
 import { AuthSignupDto } from './dto/request/auth-signup-dto';
 import { Public } from './constants';
-import { AuthGuard } from './auth.guard';
+import { JwtAuthGuard } from './jwt-auth.guard';
 import { ApiBearerAuth } from '@nestjs/swagger';
-import JwtPayloadInterface from './interfaces/jwt-payload.interface';
 
 @Controller('auth')
 export class AuthController {
@@ -31,11 +30,11 @@ export class AuthController {
     return this.authService.signIn(user);
   }
 
-  @UseGuards(AuthGuard)
+  @UseGuards(JwtAuthGuard)
   @Get('profile')
   @ApiBearerAuth()
   getProfile(@Request() req) {
-    const { email }: JwtPayloadInterface = req.user as JwtPayloadInterface;
-    return this.authService.getProfile(email);
+    console.log(req.user);
+    return this.authService.getProfileOnGuard(req.user);
   }
 }
