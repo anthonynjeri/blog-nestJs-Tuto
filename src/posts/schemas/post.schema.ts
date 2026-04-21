@@ -4,6 +4,7 @@ import {
   Category,
   CategoryDocument,
 } from '../../category/schemas/category.schema';
+import { User, UserDocument } from '../../users/schemas/users.schema';
 
 export type PostDocument = HydratedDocument<Post>;
 
@@ -20,6 +21,13 @@ export class Post {
   title: string;
   @Prop({ required: true })
   description: string;
+
+  @Prop({
+    type: mongoose.Schema.Types.ObjectId,
+    ref: User.name,
+    required: true,
+  })
+  author: Types.ObjectId | UserDocument;
 }
 
 export const PostSchema = SchemaFactory.createForClass(Post);

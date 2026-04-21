@@ -1,4 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { GetUserDto } from '../../../users/dto/response/get-user-dto';
 
 export class GetCategoryDto {
   @ApiProperty()
@@ -9,4 +10,7 @@ export class GetCategoryDto {
 
   @ApiProperty()
   description: string;
+
+  @ApiProperty()
+  author: GetUserDto;
 }

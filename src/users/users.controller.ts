@@ -1,18 +1,17 @@
-import { Body, Controller, Param, Post } from '@nestjs/common';
+import { Controller, Get, Request, UseGuards } from '@nestjs/common';
 import { UsersService } from './users.service';
-import { CreateUserDto } from './dto/request/create-user.dto';
-import { LoginUserDto } from './dto/request/login-user.dto';
+import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { ApiBearerAuth } from '@nestjs/swagger';
 
 @Controller('users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
-  @Post('signup')
-  signUp(@Body() user: CreateUserDto) {
-    return this.usersService.create(user);
-  }
 
-  @Post('login')
-  signIn(@Body() user: LoginUserDto) {
-    return this.usersService.findOneById(user.id);
+  @UseGuards(JwtAuthGuard)
+  @Get('profile')
+  @ApiBearerAuth()
+  getProfile(@Request() req) {
+    console.log(req.user);
+    return this.usersService.getUser(req.user);
   }
 }

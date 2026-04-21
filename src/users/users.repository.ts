@@ -25,10 +25,13 @@ export class UsersRepository {
   }
 
   async findOneByEmail(email: string) {
-    const user = await this.userModel.findOne({ email });
-    if (!user) {
-      throw new NotFoundException('User not found');
-    }
+    const user = await this.userModel
+      .findOne({ email })
+      .orFail(new NotFoundException('User not found'))
+      .exec();
+    // if (!user) {
+    //   throw new NotFoundException('User not found');
+    // }
 
     return user;
   }

@@ -6,27 +6,44 @@ import {
   Param,
   Post,
   Put,
+  Query,
+  Request,
+  UseGuards,
 } from '@nestjs/common';
 import { PostsService } from './posts.service';
 import { CreatePostDto } from './dto/request/create-post.dto';
 import { UpdatePostDto } from './dto/request/update-post.dto';
+import { ApiBearerAuth } from '@nestjs/swagger';
+import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { PostsPaginatedQueryDto } from './dto/request/posts-paginated-query.dto';
 
 @Controller('posts')
 export class PostsController {
-  constructor(private readonly postsService: PostsService) {}
+  constructor(
+    private readonly postsService: PostsService,
+    private readonly jwtAuthGuard: JwtAuthGuard,
+  ) {}
 
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
   @Post(':categoryId')
   create(
+    @Request() req,
     @Param('categoryId') categoryId: string,
     @Body() createPostDto: CreatePostDto,
   ) {
     console.log(createPostDto);
-    return this.postsService.createPost(categoryId, createPostDto);
+    const author = req.user;
+    const authorId = author.id;
+    return this.postsService.createPost(categoryId, authorId, createPostDto);
   }
 
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
   @Get()
-  get() {
-    return this.postsService.findAllPosts();
+  get(@Query() postsPaginatedQuery: PostsPaginatedQueryDto) {
+    // return this.postsService.findAllPosts();
+    return this.postsService.getPostsPaginated(postsPaginatedQuery);
   }
 
   @Get(':categoryId')
