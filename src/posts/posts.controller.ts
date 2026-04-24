@@ -46,6 +46,13 @@ export class PostsController {
     return this.postsService.getPostsPaginated(postsPaginatedQuery);
   }
 
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @Get('all')
+  findAll() {
+    return this.postsService.findAllPosts();
+  }
+
   @Get(':categoryId')
   getOne(@Param('categoryId') categoryId: string) {
     return this.postsService.findPostByCategory(categoryId);

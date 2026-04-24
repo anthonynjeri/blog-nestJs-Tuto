@@ -30,16 +30,16 @@ export class PostsRepository {
     return createdPost.save();
   }
 
-  // async findAllPosts() {
-  //   return this.postModel
-  //     .find()
-  //     .populate({ path: 'category', populate: { path: 'author' } })
-  //     .populate('author')
-  //     .exec();
-  // }
+  async findAllPosts() {
+    return this.postModel
+      .find()
+      .populate({ path: 'category', populate: { path: 'author' } })
+      .populate('author')
+      .exec();
+  }
   async findPaginated(postsPaginatedQuery: PostsPaginatedQueryDto) {
     const query: QueryFilter<PostDocument> = {
-      ...(!isNil(postsPaginatedQuery.search) &&
+      ...(postsPaginatedQuery.search &&
         ({
           $or: [
             { title: { $regex: postsPaginatedQuery.search, $options: 'i' } },
@@ -53,24 +53,22 @@ export class PostsRepository {
         } as QueryFilter<PostDocument>)),
     };
 
-    const totalCount = await this.postModel.countDocuments(query);
+    const totalCount = this.postModel.countDocuments(query);
 
-    const results = await this.postModel
+    const results = this.postModel
       .find(query)
       .sort(postsPaginatedQuery.toMongoDbSort)
       .skip(postsPaginatedQuery.skip)
       .limit(postsPaginatedQuery.limit)
       .exec();
 
-    return {
-      totalCount,
-      results,
-    };
+    return Promise.all([totalCount, results]);
   }
 
   async findPostsByCategory(categoryId: Types.ObjectId) {
     return this.postModel
-      .find({ categoryId: categoryId })
+      .find({ category: categoryId })
+      .orFail(new NotFoundException('Posts not found'))
       .populate('category')
       .populate('author')
       .exec();
@@ -86,7 +84,10 @@ export class PostsRepository {
   // }
   async updatePost(id: string, updatePostDto: UpdatePostDto) {
     const updatedPost = this.postModel
-      .findByIdAndUpdate(id, updatePostDto)
+      .findByIdAndUpdate(id, {
+        title: updatePostDto.title,
+        description: updatePostDto.description,
+      })
       .orFail(new NotFoundException('Could not find post with id ' + id))
       .exec();
 
@@ -100,6 +101,13 @@ export class PostsRepository {
     //
     // return post;
 
-    await this.postModel.findByIdAndDelete(id).exec();
+    await this.postModel
+      .findByIdAndDelete(id)
+      .orFail(new NotFoundException('Post not found with id ' + id))
+      .exec();
+  }
+
+  async deleteMany(id: string) {
+    await this.postModel.deleteMany({ category: id });
   }
 }

@@ -17,20 +17,20 @@ export class PostsService {
     private readonly postsMapper: PostsMapper,
     private readonly category: CategoryMapper,
   ) {}
-  // async findAllPosts() {
-  //   return this.postsRepository
-  //     .findAllPosts()
-  //     .then((posts) =>
-  //       posts.map((post) => this.postsMapper.toGetPostDto(post)),
-  //     );
-  // }
+  async findAllPosts() {
+    return this.postsRepository
+      .findAllPosts()
+      .then((posts) =>
+        posts.map((post) => this.postsMapper.toGetPostDto(post)),
+      );
+  }
   async getPostsPaginated(postsPaginatedQuery: PostsPaginatedQueryDto) {
-    const postsPaginated =
+    const [totalCount, results] =
       await this.postsRepository.findPaginated(postsPaginatedQuery);
     return this.postsMapper.toGetPaginatedPostsDto(
       postsPaginatedQuery,
-      postsPaginated.results,
-      postsPaginated.totalCount,
+      results,
+      totalCount,
     );
   }
 
@@ -62,5 +62,9 @@ export class PostsService {
 
   async deletePost(id: string) {
     return this.postsRepository.deletePost(id);
+  }
+
+  async deletePostsByCategoryId(id: string) {
+    return this.postsRepository.deleteMany(id);
   }
 }

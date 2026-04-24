@@ -1,15 +1,22 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Category, CategoryDocument } from './schemas/category.schema';
+import {
+  Category,
+  CategoryDocument,
+  CategoryEventDocument,
+} from './schemas/category.schema';
 import { Model, QueryFilter, Types } from 'mongoose';
 import { CreateCategoryDto } from './dto/request/create-category.dto';
 import { CategoryPaginatedQueryDto } from './dto/request/category-paginated-query.dto';
 import { isNil } from '@nestjs/common/internal';
+import { EventRepository } from '../event/event.repository';
 
 @Injectable()
 export class CategoryRepository {
+  private notFoundException = new NotFoundException('Not Found');
   constructor(
     @InjectModel(Category.name) private categoryModel: Model<Category>,
+    private readonly eventRepository: EventRepository,
   ) {}
 
   async createCategory(authorId: string, createCategoryDto: CreateCategoryDto) {
@@ -24,6 +31,7 @@ export class CategoryRepository {
   async findAll() {
     const categories = this.categoryModel
       .find()
+      .orFail(this.notFoundException)
       .populate('author', '-password')
       .exec();
 
@@ -31,11 +39,19 @@ export class CategoryRepository {
   }
 
   async findOne(id: string) {
-    return this.categoryModel
+    const category = await this.categoryModel
       .findOne({ _id: id })
-      .orFail(new NotFoundException('Category not found'))
+      .orFail(this.notFoundException)
       .populate('author')
+      .populate({ path: 'likes', populate: ['category', 'author'] })
+      .populate({ path: 'comments', populate: ['category', 'author'] })
       .exec();
+
+    return category as CategoryEventDocument;
+  }
+
+  async likeACategory(categoryId: string, userId: string) {
+    return this.eventRepository.likePost(userId, categoryId);
   }
 
   async findPaginated(categoryPaginatedQuery: CategoryPaginatedQueryDto) {
@@ -58,6 +74,8 @@ export class CategoryRepository {
 
     const results = await this.categoryModel
       .find(query)
+      .populate('likes')
+      .orFail(this.notFoundException)
       .sort(categoryPaginatedQuery.toMongoDbSort)
       .skip(categoryPaginatedQuery.skip)
       .limit(categoryPaginatedQuery.limit)
@@ -66,6 +84,11 @@ export class CategoryRepository {
     return { totalCount, results };
   }
 
+  async delete(id: string) {
+    await this.categoryModel
+      .findByIdAndDelete(id)
+      .orFail(this.notFoundException);
+  }
   // async delete() {
   //   return this.categoryModel.deleteMany().exec();
   // }
