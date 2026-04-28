@@ -8,6 +8,7 @@ import { PostsMapper } from './posts.mapper';
 import { CategoryModule } from '../category/category.module';
 import { AuthModule } from '../auth/auth.module';
 import { UsersModule } from '../users/users.module';
+import { EventModule } from '../event/event.module';
 
 @Module({
   imports: [
@@ -15,9 +16,10 @@ import { UsersModule } from '../users/users.module';
     CategoryModule,
     AuthModule,
     UsersModule,
+    EventModule,
   ],
   controllers: [PostsController],
   providers: [PostsService, PostsRepository, PostsMapper],
-  exports: [PostsService, PostsRepository],
+  exports: [PostsService, PostsRepository, PostsMapper],
 })
 export class PostsModule {}

@@ -16,6 +16,7 @@ import { UpdatePostDto } from './dto/request/update-post.dto';
 import { ApiBearerAuth } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { PostsPaginatedQueryDto } from './dto/request/posts-paginated-query.dto';
+import { ConnectedUser } from '../users/decorators/connected-user.decorator';
 
 @Controller('posts')
 export class PostsController {
@@ -28,14 +29,13 @@ export class PostsController {
   @ApiBearerAuth()
   @Post(':categoryId')
   create(
-    @Request() req,
+    @ConnectedUser() user,
     @Param('categoryId') categoryId: string,
     @Body() createPostDto: CreatePostDto,
   ) {
     console.log(createPostDto);
-    const author = req.user;
-    const authorId = author.id;
-    return this.postsService.createPost(categoryId, authorId, createPostDto);
+
+    return this.postsService.createPost(categoryId, user.id, createPostDto);
   }
 
   @UseGuards(JwtAuthGuard)

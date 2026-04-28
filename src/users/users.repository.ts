@@ -35,4 +35,6 @@ export class UsersRepository {
 
     return user;
   }
+
+  // async update(userId: string, user: UserDocument) {}
 }

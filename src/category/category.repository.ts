@@ -20,11 +20,13 @@ export class CategoryRepository {
   ) {}
 
   async createCategory(authorId: string, createCategoryDto: CreateCategoryDto) {
-    const createdCategory = new this.categoryModel({
+    const createdCategory = await this.categoryModel.create({
       title: createCategoryDto.title,
       description: createCategoryDto.description,
       author: new Types.ObjectId(authorId),
     });
+
+    await createdCategory.populate('author');
     return await createdCategory.save();
   }
 
@@ -82,6 +84,16 @@ export class CategoryRepository {
       .exec();
 
     return { totalCount, results };
+  }
+
+  async updateCategory(catId: string, updateCategoryDto: CreateCategoryDto) {
+    return this.categoryModel
+      .findOneAndUpdate({ _id: catId }, updateCategoryDto, {
+        returnDocument: 'after',
+      })
+      .orFail(this.notFoundException)
+      .populate('author')
+      .exec();
   }
 
   async delete(id: string) {

@@ -65,8 +65,20 @@ export class CategoryService {
     const category = await this.categoryRepository.findOne(id);
     console.log('category', category);
     // return this.categoryRepository.findOne(id);
-    return this.categoryMapper.toGetCategoryEventsDto(category);
-    // return category;
+
+    return category;
+  }
+
+  async updateCategory(
+    categoryId: string,
+    updatedCategoryDto: CreateCategoryDto,
+  ) {
+    return this.categoryMapper.toGetCategoryDto(
+      await this.categoryRepository.updateCategory(
+        categoryId,
+        updatedCategoryDto,
+      ),
+    );
   }
 
   async delete(id: string) {

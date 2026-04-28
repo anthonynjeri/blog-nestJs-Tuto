@@ -4,10 +4,9 @@ import {
   Delete,
   Get,
   Param,
+  Patch,
   Post,
-  Put,
   Query,
-  Request,
   UseGuards,
 } from '@nestjs/common';
 import { CategoryService } from './category.service';
@@ -16,6 +15,7 @@ import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { CategoryPaginatedQueryDto } from './dto/request/category-paginated-query.dto';
 import { CreateCommentDto } from '../event/dto/request/create-comment.dto';
+import { ConnectedUser } from '../users/decorators/connected-user.decorator';
 
 @ApiTags('Categories')
 @Controller('category')
@@ -25,18 +25,19 @@ export class CategoryController {
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @Post()
-  create(@Request() req, @Body() createCategoryDto: CreateCategoryDto) {
-    const author = req.user;
-    const authorId = author.id;
-    return this.categoryService.create(authorId, createCategoryDto);
+  create(@ConnectedUser() user, @Body() createCategoryDto: CreateCategoryDto) {
+    return this.categoryService.create(user.id, createCategoryDto);
   }
 
-  // @UseGuards(JwtAuthGuard)
-  // @ApiBearerAuth()
-  // @Get()
-  // get() {
-  //   return this.categoryService.findAll();
-  // }
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @Patch(':categoryId')
+  update(
+    @Param('categoryId') categoryId: string,
+    @Body() updatedCategoryDto: CreateCategoryDto,
+  ) {
+    return this.categoryService.updateCategory(categoryId, updatedCategoryDto);
+  }
 
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
@@ -65,7 +66,7 @@ export class CategoryController {
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @Post(':categoryId/like')
-  likeACategory(@Request() req, @Param('categoryId') id: string) {
+  likeACategory(@ConnectedUser() req, @Param('categoryId') id: string) {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
     return this.categoryService.likeACategory(id, req.user.id);
   }
@@ -74,7 +75,7 @@ export class CategoryController {
   @ApiBearerAuth()
   @Post(':categoryId/comment')
   commentOnACategory(
-    @Request() req,
+    @ConnectedUser() req,
     @Param('categoryId') categoryId: string,
     @Body() createCommentDto: CreateCommentDto,
   ) {

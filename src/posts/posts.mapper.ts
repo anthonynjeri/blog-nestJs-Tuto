@@ -34,11 +34,14 @@ export class PostsMapper {
     };
   }
 
-  toGetLightPostsDto = (post: PostDocument): GetPostsLightDto => ({
-    id: post.id,
-    title: post.title,
-    description: post.description,
-  });
+  toGetLightPostsDto(post: PostDocument): GetPostsLightDto {
+    console.log('post-doc', post);
+    return {
+      id: post._id.toString(),
+      title: post.title,
+      description: post.description,
+    };
+  }
 
   toGetPaginatedPostsDto(
     paginatedQuery: PaginatedQueryDto,
@@ -46,7 +49,7 @@ export class PostsMapper {
     totalCount: number,
   ) {
     return new GetPostsPaginatedDto(
-      posts.map(this.toGetLightPostsDto),
+      posts.map((p) => this.toGetLightPostsDto(p)),
       paginatedQuery,
       totalCount,
     );

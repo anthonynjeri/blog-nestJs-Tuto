@@ -7,6 +7,10 @@ import { EventRepository } from './event.repository';
 import { CategoryModule } from '../category/category.module';
 import { EventMapper } from './event.mapper';
 import { UsersModule } from '../users/users.module';
+import { PostsModule } from '../posts/posts.module';
+import { EventService } from './event.service';
+import { EventController } from './event.controller';
+import { AuthModule } from '../auth/auth.module';
 
 @Module({
   imports: [
@@ -22,8 +26,11 @@ import { UsersModule } from '../users/users.module';
     ]),
     forwardRef(() => CategoryModule),
     UsersModule,
+    forwardRef(() => PostsModule),
+    AuthModule,
   ],
-  providers: [EventRepository, EventMapper],
-  exports: [EventRepository, EventMapper],
+  controllers: [EventController],
+  providers: [EventRepository, EventMapper, EventController, EventService],
+  exports: [EventRepository, EventMapper, EventController, EventService],
 })
 export class EventModule {}

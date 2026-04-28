@@ -1,9 +1,11 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { GetCategoryLightDto } from '../../../category/dto/response/get-category-light.dto';
 import { GetUserDto } from '../../../users/dto/response/get-user-dto';
-import { GetEventDto } from './get-event.dto';
 
-export class LikeEventDto extends GetEventDto {
+export class GetLikesDto {
+  @ApiProperty()
+  id: string;
+
   @ApiProperty()
   category: GetCategoryLightDto;
 

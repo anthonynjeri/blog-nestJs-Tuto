@@ -4,13 +4,10 @@ import { UpdatePostDto } from './dto/request/update-post.dto';
 import { InjectModel } from '@nestjs/mongoose';
 import { Post, PostDocument } from './schemas/post.schema';
 import { Model, QueryFilter, Types } from 'mongoose';
-import { isNil } from '@nestjs/common/internal';
 import { PostsPaginatedQueryDto } from './dto/request/posts-paginated-query.dto';
 
 @Injectable()
 export class PostsRepository {
-  // private readonly posts: IPost[] = [];
-
   constructor(@InjectModel(Post.name) private postModel: Model<PostDocument>) {}
 
   async createPost(
@@ -74,14 +71,6 @@ export class PostsRepository {
       .exec();
   }
 
-  async findPostById(id: string) {
-    // return this.posts.find((post) => post.id === id);
-    return this.postModel.findById(id).exec();
-  }
-
-  // async findIndexPostById(id: number): Promise<number> {
-  //   return this.posts.findIndex((post) => post.id === id);
-  // }
   async updatePost(id: string, updatePostDto: UpdatePostDto) {
     const updatedPost = this.postModel
       .findByIdAndUpdate(id, {
@@ -95,12 +84,6 @@ export class PostsRepository {
   }
 
   async deletePost(id: string) {
-    // const post = this.posts.at(await this.findIndexPostById(id));
-    // if (!post) throw new Error('Post not found');
-    // this.posts.splice(await this.findIndexPostById(id), 1);
-    //
-    // return post;
-
     await this.postModel
       .findByIdAndDelete(id)
       .orFail(new NotFoundException('Post not found with id ' + id))

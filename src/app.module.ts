@@ -6,6 +6,9 @@ import { PostsModule } from './posts/posts.module';
 import { CategoryModule } from './category/category.module';
 import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
+import { EventModule } from './event/event.module';
+import { CommentsModule } from './comments/comments.module';
+import { LikesModule } from './likes/likes.module';
 
 @Module({
   imports: [
@@ -14,6 +17,9 @@ import { UsersModule } from './users/users.module';
     CategoryModule,
     AuthModule,
     UsersModule,
+    EventModule,
+    CommentsModule,
+    LikesModule,
   ],
   controllers: [AppController],
   providers: [AppService],

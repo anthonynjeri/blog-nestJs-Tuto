@@ -1,22 +1,10 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import mongoose, { HydratedDocument, Types } from 'mongoose';
 import { User, UserDocument } from '../../users/schemas/users.schema';
-import { LikeDocument, LikeEvent } from '../../event/like-event.schema';
-import {
-  CommentDocument,
-  CommentEvent,
-} from '../../event/comment-event.schema';
 
 export type CategoryDocument = HydratedDocument<Category>;
-export interface ICategoryEvents {
-  likes: LikeDocument[];
-  comments: CommentDocument[];
-}
 
-export type CategoryEventDocument = HydratedDocument<
-  CategoryDocument,
-  ICategoryEvents
->;
+export type CategoryEventDocument = HydratedDocument<CategoryDocument>;
 
 @Schema({
   timestamps: true,
