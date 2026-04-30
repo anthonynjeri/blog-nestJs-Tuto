@@ -9,6 +9,8 @@ import { CategoryModule } from '../category/category.module';
 import { AuthModule } from '../auth/auth.module';
 import { UsersModule } from '../users/users.module';
 import { EventModule } from '../event/event.module';
+import { TranslateModule } from '../translator/translate.module';
+import { CacheModule } from '@nestjs/cache-manager';
 
 @Module({
   imports: [
@@ -17,6 +19,8 @@ import { EventModule } from '../event/event.module';
     AuthModule,
     UsersModule,
     EventModule,
+    TranslateModule,
+    CacheModule.register(),
   ],
   controllers: [PostsController],
   providers: [PostsService, PostsRepository, PostsMapper],

@@ -9,6 +9,7 @@ import { AuthModule } from '../auth/auth.module';
 import { UsersModule } from '../users/users.module';
 import { PostsModule } from '../posts/posts.module';
 import { EventModule } from '../event/event.module';
+import { TranslateModule } from '../translator/translate.module';
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { EventModule } from '../event/event.module';
     ]),
     AuthModule,
     UsersModule,
+    TranslateModule,
     forwardRef(() => EventModule),
     forwardRef(() => PostsModule),
   ],

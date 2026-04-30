@@ -8,7 +8,7 @@ import { UsersModule } from '../users/users.module';
 import { PostsModule } from '../posts/posts.module';
 import { CommentsMapper } from './comments.mapper';
 import { AuthModule } from '../auth/auth.module';
-import { DeeplLanguageModule } from '../_utils/translator/deepl-language.module';
+import { TranslateModule } from '../translator/translate.module';
 
 @Module({
   imports: [
@@ -21,7 +21,7 @@ import { DeeplLanguageModule } from '../_utils/translator/deepl-language.module'
     UsersModule,
     PostsModule,
     AuthModule,
-    DeeplLanguageModule,
+    TranslateModule,
   ],
   controllers: [CommentsController],
   providers: [CommentsService, CommentsRepository, CommentsMapper],

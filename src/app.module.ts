@@ -9,10 +9,24 @@ import { UsersModule } from './users/users.module';
 import { EventModule } from './event/event.module';
 import { CommentsModule } from './comments/comments.module';
 import { LikesModule } from './likes/likes.module';
+import { TranslateModule } from './translator/translate.module';
+import { ConfigModule, ConfigService } from '@nestjs/config';
+import { EnvironmentVariables, validateEnv } from './_utils/config/env.config';
+import { CacheModule } from '@nestjs/cache-manager';
 
 @Module({
   imports: [
-    MongooseModule.forRoot('mongodb://localhost:27017/redditBlog'),
+    ConfigModule.forRoot({ validate: validateEnv, isGlobal: true }),
+    MongooseModule.forRootAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: (
+        configService: ConfigService<EnvironmentVariables, true>,
+      ) => ({
+        uri: configService.get('MONGODB_URL'),
+      }),
+    }),
+    CacheModule.register({ isGlobal: true }),
     PostsModule,
     CategoryModule,
     AuthModule,
@@ -20,6 +34,7 @@ import { LikesModule } from './likes/likes.module';
     EventModule,
     CommentsModule,
     LikesModule,
+    TranslateModule,
   ],
   controllers: [AppController],
   providers: [AppService],

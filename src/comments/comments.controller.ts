@@ -9,10 +9,11 @@ import {
 } from '@nestjs/common';
 import { CommentsService } from './comments.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
-import { ConnectedUser } from '../users/decorators/connected-user.decorator';
+import { ConnectedUser } from '../users/_utils/decorator/connected-user.decorator';
 import { CreateNewCommentDto } from './dto/request/create-new-comment.dto';
 import { ApiBearerAuth } from '@nestjs/swagger';
 import { UpdateCommentDto } from './dto/request/update-comment.dto';
+import { Protect } from '../auth/_utils/decorator/protect.decorator';
 
 @Controller({
   path: 'comments',
@@ -21,9 +22,8 @@ export class CommentsController {
   constructor(private readonly commentsService: CommentsService) {}
 
   // Create a comment
-  @UseGuards(JwtAuthGuard)
+  @Protect()
   @Post(':postId')
-  @ApiBearerAuth()
   create(
     @ConnectedUser() user,
     @Param('postId') id: string,
@@ -33,26 +33,23 @@ export class CommentsController {
   }
 
   // Get all comments
-  @UseGuards(JwtAuthGuard)
+  @Protect()
   @Get()
-  @ApiBearerAuth()
   getComments() {
     return this.commentsService.getAllComments();
   }
 
   // Get comments by post id
-  @UseGuards(JwtAuthGuard)
+  @Protect()
   @Get(':postId')
-  @ApiBearerAuth()
   getCommentsByPostId(@Param('postId') postId: string, @ConnectedUser() user) {
     console.log(user.id);
     return this.commentsService.getCommentsByPostId(postId);
   }
 
   // Update comments
-  @UseGuards(JwtAuthGuard)
+  @Protect()
   @Patch(':commentId')
-  @ApiBearerAuth()
   updateComment(
     @Param('commentId') commentId: string,
     @ConnectedUser() user,

@@ -23,8 +23,17 @@ export class PostsRepository {
       description: createPostDto.description,
       author: new Types.ObjectId(authorId),
     });
-
+    await createdPost.populate(['category', 'author']);
     return createdPost.save();
+  }
+
+  async findOnePost(postId: string) {
+    return this.postModel
+      .findOne({ _id: postId })
+      .orFail(new NotFoundException('Post not found'))
+      .populate({ path: 'category', populate: { path: 'author' } })
+      .populate('author')
+      .exec();
   }
 
   async findAllPosts() {

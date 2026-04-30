@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 
 import { PostsRepository } from './posts.repository';
 import { CreatePostDto } from './dto/request/create-post.dto';
@@ -8,14 +8,18 @@ import { PostsMapper } from './posts.mapper';
 import { CategoryMapper } from '../category/category.mapper';
 import { UsersMapper } from '../users/users.mapper';
 import { PostsPaginatedQueryDto } from './dto/request/posts-paginated-query.dto';
+import { TranslateService } from '../translator/translate.service';
+import { CACHE_MANAGER, Cache } from '@nestjs/cache-manager';
 
 @Injectable()
 export class PostsService {
   constructor(
+    @Inject(CACHE_MANAGER) private cacheManager: Cache,
     private readonly postsRepository: PostsRepository,
     private readonly usersMapper: UsersMapper,
     private readonly postsMapper: PostsMapper,
     private readonly category: CategoryMapper,
+    private readonly translateService: TranslateService,
   ) {}
   async findAllPosts() {
     return this.postsRepository
@@ -24,6 +28,26 @@ export class PostsService {
         posts.map((post) => this.postsMapper.toGetPostDto(post)),
       );
   }
+
+  async findOnePostAndTranslate(postId: string, lang: string) {
+    const cachedPost = await this.cacheManager.get(postId);
+    if (cachedPost) {
+      console.log(cachedPost);
+      return cachedPost;
+    }
+    const post = await this.postsRepository.findOnePost(postId);
+
+    const translatedPost = this.translateService.getTextTranslation(
+      post.title,
+      post.description,
+      lang,
+    );
+
+    await this.cacheManager.set(post.id, translatedPost);
+    // console.log(this.cacheManager.clear());
+    return translatedPost;
+  }
+
   async getPostsPaginated(postsPaginatedQuery: PostsPaginatedQueryDto) {
     const [totalCount, results] =
       await this.postsRepository.findPaginated(postsPaginatedQuery);
@@ -53,7 +77,7 @@ export class PostsService {
       createPostDto,
     );
 
-    return post;
+    return this.postsMapper.toGetPostDto(post);
   }
 
   async updatePost(id: string, updatePostDto: UpdatePostDto) {

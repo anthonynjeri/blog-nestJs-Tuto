@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { LikeEventDto } from '../../../event/dto/response/like-event.dto';
 import { CommentEventDto } from '../../../event/dto/response/comment-event.dto';
-import { GetUserDto } from '../../../users/dto/response/get-user-dto';
+import { GetUserDto } from '../../../users/_utils/dto/response/get-user-dto';
 
 export class GetCategoryEventsDto {
   @ApiProperty()

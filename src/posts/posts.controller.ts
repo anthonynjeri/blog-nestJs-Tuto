@@ -7,17 +7,19 @@ import {
   Post,
   Put,
   Query,
-  Request,
-  UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
 import { PostsService } from './posts.service';
 import { CreatePostDto } from './dto/request/create-post.dto';
 import { UpdatePostDto } from './dto/request/update-post.dto';
-import { ApiBearerAuth } from '@nestjs/swagger';
+import { ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { PostsPaginatedQueryDto } from './dto/request/posts-paginated-query.dto';
-import { ConnectedUser } from '../users/decorators/connected-user.decorator';
+import { ConnectedUser } from '../users/_utils/decorator/connected-user.decorator';
+import { Protect } from '../auth/_utils/decorator/protect.decorator';
+import { CacheInterceptor, CacheKey, CacheTTL } from '@nestjs/cache-manager';
 
+@ApiTags('Posts')
 @Controller('posts')
 export class PostsController {
   constructor(
@@ -25,8 +27,7 @@ export class PostsController {
     private readonly jwtAuthGuard: JwtAuthGuard,
   ) {}
 
-  @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth()
+  @Protect()
   @Post(':categoryId')
   create(
     @ConnectedUser() user,
@@ -38,35 +39,50 @@ export class PostsController {
     return this.postsService.createPost(categoryId, user.id, createPostDto);
   }
 
-  @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth()
+  @Protect()
   @Get()
   get(@Query() postsPaginatedQuery: PostsPaginatedQueryDto) {
     // return this.postsService.findAllPosts();
     return this.postsService.getPostsPaginated(postsPaginatedQuery);
   }
 
-  @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth()
+  @Protect()
   @Get('all')
   findAll() {
     return this.postsService.findAllPosts();
   }
 
+  @Protect()
   @Get(':categoryId')
   getOne(@Param('categoryId') categoryId: string) {
     return this.postsService.findPostByCategory(categoryId);
   }
 
+  @Protect()
   @Put(':id')
-  update(@Param('id') id: string, @Body() updatePostDto: UpdatePostDto) {
+  update(
+    @ConnectedUser() user,
+    @Param('id') id: string,
+    @Body() updatePostDto: UpdatePostDto,
+  ) {
     console.log(id);
     console.log(updatePostDto);
     return this.postsService.updatePost(id, updatePostDto);
   }
 
+  @Protect()
   @Delete(':id')
-  delete(@Param('id') id: string) {
+  delete(@ConnectedUser() user, @Param('id') id: string) {
     return this.postsService.deletePost(id);
+  }
+
+  //   Posts with translation
+  @UseInterceptors(CacheInterceptor)
+  @CacheKey('postId')
+  @CacheTTL(0)
+  @Protect()
+  @Get(':id/translate')
+  translatePost(@Param('id') id: string, @Query('lang') lang: string = 'fr') {
+    return this.postsService.findOnePostAndTranslate(id, lang);
   }
 }

@@ -6,8 +6,8 @@ import {
 import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
 import { UsersRepository } from '../users/users.repository';
-import { AuthSignupDto } from './dto/request/auth-signup-dto';
-import { AuthSigninDto } from './dto/request/auth-signin.dto';
+import { AuthSignupDto } from './_utils/dto/request/auth-signup-dto';
+import { AuthSigninDto } from './_utils/dto/request/auth-signin.dto';
 import { UsersService } from '../users/users.service';
 import { UserDocument } from '../users/schemas/users.schema';
 

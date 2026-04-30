@@ -22,23 +22,25 @@ export class CommentsService {
       createCommentDto,
     );
 
-    return this.commentsMapper.toGetCommentDto(commment);
+    return await this.commentsMapper.toGetCommentDto(commment);
   }
 
   async getAllComments() {
     const comments = await this.commentsRepository.getAllComments();
-
-    // console.log(comments);
-    return comments.map((comment) =>
-      this.commentsMapper.toGetCommentDto(comment),
+    // console.log(comments)
+    const parsedComments = await Promise.all(
+      comments.map((comment) => this.commentsMapper.toGetCommentDto(comment)),
     );
+
+    console.log('Parsed-Comments :', parsedComments);
+    return parsedComments;
   }
 
   async getCommentsByPostId(postId: string) {
     const comments = await this.commentsRepository.getCommentsByPostId(postId);
 
-    return comments.map((comment) =>
-      this.commentsMapper.toGetCommentDto(comment),
+    return await Promise.all(
+      comments.map((comment) => this.commentsMapper.toGetCommentDto(comment)),
     );
   }
 
@@ -48,6 +50,6 @@ export class CommentsService {
       updateCommentDto,
     );
 
-    return this.commentsMapper.toGetCommentDto(comment);
+    return await this.commentsMapper.toGetCommentDto(comment);
   }
 }

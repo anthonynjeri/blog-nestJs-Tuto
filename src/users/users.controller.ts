@@ -1,18 +1,18 @@
-import { Controller, Get, Request, UseGuards } from '@nestjs/common';
+import { Controller, Get } from '@nestjs/common';
 import { UsersService } from './users.service';
-import { JwtAuthGuard } from '../auth/jwt-auth.guard';
-import { ApiBearerAuth } from '@nestjs/swagger';
-import { ConnectedUser } from './decorators/connected-user.decorator';
+import { ApiTags } from '@nestjs/swagger';
+import { ConnectedUser } from './_utils/decorator/connected-user.decorator';
+import { Protect } from '../auth/_utils/decorator/protect.decorator';
 
+@ApiTags('Users')
 @Controller('users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
-  @UseGuards(JwtAuthGuard)
+  @Protect()
   @Get('profile')
-  @ApiBearerAuth()
-  getProfile(@ConnectedUser() req) {
-    console.log(req.user);
-    return this.usersService.getUser(req.user);
+  getProfile(@ConnectedUser() user) {
+    console.log(user);
+    return this.usersService.getUser(user);
   }
 }

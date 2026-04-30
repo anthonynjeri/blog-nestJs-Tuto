@@ -4,7 +4,6 @@ import { CategoryRepository } from './category.repository';
 import { CategoryMapper } from './category.mapper';
 import { CategoryPaginatedQueryDto } from './dto/request/category-paginated-query.dto';
 import { PostsService } from '../posts/posts.service';
-import { EventMapper } from '../event/event.mapper';
 import { CreateCommentDto } from '../event/dto/request/create-comment.dto';
 import { EventRepository } from '../event/event.repository';
 
@@ -16,7 +15,6 @@ export class CategoryService {
     // @Inject(forwardRef(() => PostsService))
     private readonly postsService: PostsService,
     private categoryMapper: CategoryMapper,
-    private eventMapper: EventMapper,
   ) {}
   async create(authorId: string, createCategoryDto: CreateCategoryDto) {
     const category = await this.categoryRepository.createCategory(
@@ -58,6 +56,32 @@ export class CategoryService {
       categoryPaginatedQuery,
       categoriesPaginated.results,
       categoriesPaginated.totalCount,
+    );
+  }
+
+  async findAll() {
+    const categories = await this.categoryRepository.findAll();
+    // const data = this.deeplLanguageService.getTextTranslated('hello world');
+    // console.log(data);
+    // const categoriesWithTranslatedText = await Promise.all(
+    //   await Promise.all(
+    //     categories.map(async (category) => {
+    //       return {
+    //         ...category,
+    //         title: await this.deeplLanguageService.getTextTranslated(
+    //           category.title[0],
+    //         ),
+    //         description: await this.deeplLanguageService.getTextTranslated(
+    //           category.description[0],
+    //         ),
+    //       };
+    //     }),
+    //   ),
+    // );
+    // console.log(categoriesWithTranslatedText);
+    // return categoriesWithTranslatedText;
+    return categories.map((category) =>
+      this.categoryMapper.toGetCategoryDto(category),
     );
   }
 
