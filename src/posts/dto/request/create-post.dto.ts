@@ -1,5 +1,7 @@
-import { IsString, MaxLength, MinLength } from 'class-validator';
+import { IsOptional, IsString, MaxLength, MinLength } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
+import { MemoryStoredFile } from 'nestjs-form-data';
+import { IsImageUpload } from '../../../_utils/decorators/is-image-file.decorator';
 
 export class CreatePostDto {
   @ApiProperty()
@@ -11,4 +13,8 @@ export class CreatePostDto {
   @ApiProperty()
   @IsString()
   description: string;
+
+  @IsOptional()
+  @IsImageUpload({ description: 'Image for the post' })
+  postImage?: MemoryStoredFile;
 }

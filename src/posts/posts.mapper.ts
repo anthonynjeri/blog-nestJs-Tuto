@@ -7,12 +7,20 @@ import { UsersMapper } from '../users/users.mapper';
 import { GetPostsLightDto } from './dto/response/get-posts-light.dto';
 import { PaginatedQueryDto } from '../_utils/dto/requests/paginated-query.dto';
 import { GetPostsPaginatedDto } from './dto/response/get-posts-paginated.dto';
+import { GetTranslatedPostDto } from './dto/response/get-translated-post.dto';
+import { StorageClientMapper } from '../storage/storage-client.mapper';
+import { ConfigService } from '@nestjs/config';
+import { EnvironmentVariables } from '../_utils/config/env.config';
+import { StorageService } from '../storage/storage.service';
 
 @Injectable()
 export class PostsMapper {
   constructor(
     private readonly categoryMapper: CategoryMapper,
     private readonly usersMapper: UsersMapper,
+    private configService: ConfigService<EnvironmentVariables, true>,
+    private storageService: StorageService,
+    private storageClientMapper: StorageClientMapper,
   ) {}
   toGetPostDto(post: PostDocument): GetPostDto {
     if (post.category instanceof Types.ObjectId)
@@ -29,8 +37,37 @@ export class PostsMapper {
       id: post._id.toString(),
       title: post.title,
       description: post.description,
+      postImageUrl: post.postImage?.filename
+        ? StorageClientMapper.createUrlImage(
+            post.author.id,
+            this.configService.get('RUSTFS_ENDPOINT'),
+            this.configService.get('RUSTFS_BUCKET_NAME'),
+          )
+        : null,
       author: this.usersMapper.toGetUserDto(post.author),
       category: this.categoryMapper.toGetCategoryLightDto(post.category),
+    };
+  }
+
+  toGetTranslatedPostDto(
+    post: PostDocument,
+    lang: string,
+  ): GetTranslatedPostDto {
+    if (post.category instanceof Types.ObjectId) {
+      throw new InternalServerErrorException('Category not populated');
+    }
+
+    if (post.author instanceof Types.ObjectId) {
+      throw new InternalServerErrorException('Author not populated');
+    }
+
+    return {
+      id: post._id.toString(),
+      title: post.title,
+      description: post.description,
+      author: this.usersMapper.toGetUserLightDto(post.author),
+      category: this.categoryMapper.toGetCategoryLightDto(post.category),
+      translations: { lang, ...post.translations.get(lang) },
     };
   }
 

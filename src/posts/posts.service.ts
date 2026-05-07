@@ -1,4 +1,4 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 
 import { PostsRepository } from './posts.repository';
 import { CreatePostDto } from './dto/request/create-post.dto';
@@ -9,43 +9,45 @@ import { CategoryMapper } from '../category/category.mapper';
 import { UsersMapper } from '../users/users.mapper';
 import { PostsPaginatedQueryDto } from './dto/request/posts-paginated-query.dto';
 import { TranslateService } from '../translator/translate.service';
-import { CACHE_MANAGER, Cache } from '@nestjs/cache-manager';
+import { CommentsService } from '../comments/comments.service';
+import { CreatePostCommentDto } from './dto/request/create-post-comment.dto';
+import { StorageService } from '../storage/storage.service';
+import { StorageClientMapper } from '../storage/storage-client.mapper';
 
 @Injectable()
 export class PostsService {
   constructor(
-    @Inject(CACHE_MANAGER) private cacheManager: Cache,
     private readonly postsRepository: PostsRepository,
     private readonly usersMapper: UsersMapper,
     private readonly postsMapper: PostsMapper,
     private readonly category: CategoryMapper,
     private readonly translateService: TranslateService,
+    private readonly commentsService: CommentsService,
+    private readonly storageService: StorageService,
+    private readonly storageClientMapper: StorageClientMapper,
   ) {}
   async findAllPosts() {
     return this.postsRepository
       .findAllPosts()
-      .then((posts) =>
-        posts.map((post) => this.postsMapper.toGetPostDto(post)),
-      );
+      .then((posts) => posts.map((post) => post));
   }
 
   async findOnePostAndTranslate(postId: string, lang: string) {
-    const cachedPost = await this.cacheManager.get(postId);
-    if (cachedPost) {
-      console.log(cachedPost);
-      return cachedPost;
-    }
     const post = await this.postsRepository.findOnePost(postId);
-
-    const translatedPost = this.translateService.getTextTranslation(
+    const existingTransalation = post.translations.get(lang);
+    if (existingTransalation) {
+      return this.postsMapper.toGetTranslatedPostDto(post, lang);
+    }
+    const translatedPost = await this.translateService.getTextTranslation(
       post.title,
       post.description,
       lang,
     );
+    post.translations.set(lang, translatedPost);
 
-    await this.cacheManager.set(post.id, translatedPost);
-    // console.log(this.cacheManager.clear());
-    return translatedPost;
+    await post.save();
+    // const postToReturn = post.translations.get(lang);
+    return this.postsMapper.toGetTranslatedPostDto(post, lang);
   }
 
   async getPostsPaginated(postsPaginatedQuery: PostsPaginatedQueryDto) {
@@ -78,6 +80,20 @@ export class PostsService {
     );
 
     return this.postsMapper.toGetPostDto(post);
+  }
+
+  async commentOnPost(
+    postId: string,
+    authorId: string,
+    createCommentDto: CreatePostCommentDto,
+  ) {
+    const comment = await this.commentsService.create(
+      postId,
+      authorId,
+      createCommentDto,
+    );
+
+    return comment;
   }
 
   async updatePost(id: string, updatePostDto: UpdatePostDto) {

@@ -1,8 +1,8 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { GetUserDto } from '../../../users/_utils/dto/response/get-user-dto';
 import { GetCategoryLightDto } from '../../../category/dto/response/get-category-light.dto';
+import { GetLightUserDto } from '../../../users/_utils/dto/response/get-light-user.dto';
 
-export class GetPostDto {
+export class GetTranslatedPostDto {
   @ApiProperty({ description: 'Post ID', example: 'ejuhs9883geh75hrye' })
   id: string;
   @ApiProperty({ description: 'Category ID', example: 'ejuhs9883geh75hrye' })
@@ -11,12 +11,17 @@ export class GetPostDto {
   title: string;
   @ApiProperty({ description: 'Post description', example: 'Post desc' })
   description: string;
-
-  @ApiProperty({ description: 'Post image url' })
-  postImageUrl: string | null;
   @ApiProperty({
     description: 'Author of post',
     example: '{id:"",firstname:"",lastname:""}',
   })
-  author: GetUserDto;
+  author: GetLightUserDto;
+  @ApiProperty({
+    description: 'language translations',
+    example: "fr:{title:'Bonjour', description:'Bonjour'}",
+  })
+  translations?: {
+    lang: string;
+    translation?: { title: string; description: string };
+  };
 }

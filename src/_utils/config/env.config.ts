@@ -1,4 +1,4 @@
-import { IsNumber, IsString, validateSync } from 'class-validator';
+import { IsNumber, IsOptional, IsString, validateSync } from 'class-validator';
 import { exit } from 'process';
 import { Logger } from '@nestjs/common';
 import { plainToInstance } from 'class-transformer';
@@ -21,6 +21,28 @@ export class EnvironmentVariables {
 
   @IsNumber()
   PORT: number;
+
+  @IsString()
+  RUSTFS_ENDPOINT: string;
+
+  @IsOptional()
+  @IsNumber()
+  RUSTFS_PORT?: number;
+
+  @IsString()
+  RUSTFS_ACCESS_KEY: string;
+
+  @IsString()
+  RUSTFS_SECRET_KEY: string;
+
+  @IsString()
+  RUSTFS_BUCKET_NAME: string;
+
+  @IsString()
+  RUSTFS_REGION: string;
+
+  @IsNumber()
+  UPLOAD_MAX_FILES: number;
 }
 
 export function validateEnv(config: Record<string, unknown>) {

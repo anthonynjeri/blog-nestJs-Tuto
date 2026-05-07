@@ -10,7 +10,9 @@ import { AuthModule } from '../auth/auth.module';
 import { UsersModule } from '../users/users.module';
 import { EventModule } from '../event/event.module';
 import { TranslateModule } from '../translator/translate.module';
-import { CacheModule } from '@nestjs/cache-manager';
+import { CommentsModule } from '../comments/comments.module';
+import { NestjsFormDataModule } from 'nestjs-form-data';
+import { StorageModule } from '../storage/storage.module';
 
 @Module({
   imports: [
@@ -20,7 +22,9 @@ import { CacheModule } from '@nestjs/cache-manager';
     UsersModule,
     EventModule,
     TranslateModule,
-    CacheModule.register(),
+    CommentsModule,
+    NestjsFormDataModule,
+    StorageModule,
   ],
   controllers: [PostsController],
   providers: [PostsService, PostsRepository, PostsMapper],

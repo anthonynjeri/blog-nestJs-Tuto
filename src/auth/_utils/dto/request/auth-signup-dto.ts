@@ -7,7 +7,7 @@ import {
 } from 'class-validator';
 
 export class AuthSignupDto {
-  @ApiProperty({ description: 'Email', example: 'user-name@Example.com' })
+  @ApiProperty({ description: 'Email', example: 'admin@Example.com' })
   @IsNotEmpty()
   @IsEmail()
   email: string;
@@ -19,7 +19,7 @@ export class AuthSignupDto {
   @IsNotEmpty()
   @IsString()
   lastname: string;
-  @ApiProperty({ description: 'Password', example: 'user-password' })
+  @ApiProperty({ description: 'Password', example: 'Password123*' })
   @IsNotEmpty()
   @IsStrongPassword({
     minLength: 8,

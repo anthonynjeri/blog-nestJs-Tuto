@@ -13,6 +13,8 @@ import { TranslateModule } from './translator/translate.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { EnvironmentVariables, validateEnv } from './_utils/config/env.config';
 import { CacheModule } from '@nestjs/cache-manager';
+import { StorageModule } from '././storage/storage.module';
+import { MemoryStoredFile, NestjsFormDataModule } from 'nestjs-form-data';
 
 @Module({
   imports: [
@@ -35,6 +37,7 @@ import { CacheModule } from '@nestjs/cache-manager';
     CommentsModule,
     LikesModule,
     TranslateModule,
+    StorageModule,
   ],
   controllers: [AppController],
   providers: [AppService],

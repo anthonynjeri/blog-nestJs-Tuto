@@ -5,10 +5,16 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Post, PostDocument } from './schemas/post.schema';
 import { Model, QueryFilter, Types } from 'mongoose';
 import { PostsPaginatedQueryDto } from './dto/request/posts-paginated-query.dto';
+import { StorageClientMapper } from '../storage/storage-client.mapper';
+import { StorageService } from '../storage/storage.service';
+import { S3File } from '../storage/schemas/s3-file.schema';
 
 @Injectable()
 export class PostsRepository {
-  constructor(@InjectModel(Post.name) private postModel: Model<PostDocument>) {}
+  constructor(
+    @InjectModel(Post.name) private postModel: Model<PostDocument>,
+    private storageService: StorageService,
+  ) {}
 
   async createPost(
     categoryId: string,
@@ -17,10 +23,28 @@ export class PostsRepository {
   ) {
     console.log(categoryId);
     console.log(createPostDto);
+
+    let imageKey;
+    let imageUrl: S3File | undefined;
+
+    if (createPostDto.postImage) {
+      imageKey = StorageClientMapper.getImageKey(
+        authorId,
+        createPostDto.postImage,
+      );
+      console.log('image key', imageKey);
+      imageUrl = await this.storageService.uploadFile(
+        imageKey,
+        createPostDto.postImage,
+      );
+
+      console.log(imageUrl);
+    }
     const createdPost = new this.postModel({
       category: new Types.ObjectId(categoryId),
       title: createPostDto.title,
       description: createPostDto.description,
+      postImage: imageUrl,
       author: new Types.ObjectId(authorId),
     });
     await createdPost.populate(['category', 'author']);
